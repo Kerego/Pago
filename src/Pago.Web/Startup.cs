@@ -52,19 +52,29 @@ namespace Pago.Web
 
 			app.UseApplicationInsightsExceptionTelemetry();
 
-			app.UseMvc();
-			app.UseStaticFiles();
+			DefaultFilesOptions options = new DefaultFilesOptions();
+			options.DefaultFileNames.Clear();
+			options.DefaultFileNames.Add("index.html");
+
 			app.Use(async (context, next) =>
 			{
 				await next();
 
-				if(context.Response.StatusCode == 404 &&
+				if (context.Response.StatusCode == 404 &&
 					!Path.HasExtension(context.Request.Path.Value))
 				{
 					context.Request.Path = "/index.html";
+					context.Response.StatusCode = 200;
 					await next();
 				}
 			});
+
+			//app.UseCors("AllowAll");
+			app.UseMvc();
+			app.UseDefaultFiles(options);
+			app.UseStaticFiles();
+
+			
 		}
 	}
 }
