@@ -4,50 +4,57 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Pago.Web.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Pago.Web.Controllers
 {
     [Route("api/[controller]")]
     public class HeroesController : Controller
     {
-        // GET api/values
-        [HttpGet]
-        public IEnumerable<Hero> Get()
-        {
-            return new Hero[] 
-            { 
-                new Hero { id = 0, name = "zero"},
-                new Hero { id = 1, name = "uno"},
-                new Hero { id = 2, name = "dos"},
-                new Hero { id = 3, name = "tres"},
-                new Hero { id = 4, name = "cuatro"},
-                new Hero { id = 5, name = "cinco"} 
-            };
-        }
+		private readonly PagoDbContext _context;
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+		public HeroesController(PagoDbContext context)
+		{
+			_context = context;
+		}
 
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
+		// GET api/values
+		[HttpGet]
+		public IEnumerable<Hero> Get()
+		{
+			return _context.Heroes.ToList();
+		}
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
+		// GET api/values/5
+		[HttpGet("{id}")]
+		public async Task<Hero> Get(int id) => await _context.Heroes.FirstOrDefaultAsync(x => x.id == id);
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-    }
+		// POST api/values
+		[HttpPost]
+		public async Task Post([FromBody]Hero hero)
+		{
+			_context.Heroes.Add(hero);
+			await _context.SaveChangesAsync();
+		}
+
+		// PUT api/values/5
+		[HttpPut("{id}")]
+		public async Task Put(int id, [FromBody]Hero value)
+		{
+			_context.Update(value);
+			await _context.SaveChangesAsync();
+		}
+
+		// DELETE api/values/5
+		[HttpDelete("{id}")]
+		public async Task Delete(int id)
+		{
+			var hero = await _context.Heroes.FirstOrDefaultAsync(x => x.id == id);
+			if (hero != null)
+			{
+				_context.Remove(hero);
+				await _context.SaveChangesAsync();
+			}
+		}
+	}
 }

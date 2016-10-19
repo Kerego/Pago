@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.StaticFiles;
 using System.IO;
+using Pago.Web.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Pago.Web
 {
@@ -38,7 +40,8 @@ namespace Pago.Web
 		{
 			// Add framework services.
 			services.AddApplicationInsightsTelemetry(Configuration);
-
+			services.AddDbContext<PagoDbContext>(options => 
+				options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 			services.AddMvc();
 		}
 
